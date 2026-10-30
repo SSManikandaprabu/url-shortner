@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkPulse — URL Shortener & README Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased h-full flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-link text-white text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-indigo-400 bg-clip-text text-transparent">LinkPulse</span>
+                    <span class="text-xs block text-slate-400">URL Shortener & README Hub</span>
+                </div>
+            </div>
+            <!-- Navigation Tabs -->
+            <nav class="hidden md:flex space-x-1 bg-slate-800/60 p-1 rounded-xl border border-slate-700/50">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-indigo-600 text-white shadow">
+                    <i class="fa-solid fa-gauge-high mr-2"></i> Dashboard
+                </button>
+                <button onclick="switchTab('analytics')" id="nav-analytics" class="px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-chart-line mr-2"></i> Analytics
+                </button>
+                <button onclick="switchTab('readme')" id="nav-readme" class="px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white">
+                    <i class="fa-brands fa-markdown mr-2"></i> README Generator
+                </button>
+            </nav>
+            <div class="flex items-center space-x-3">
+                <button onclick="openModal('qr-modal')" class="hidden sm:inline-flex items-center px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm font-medium transition text-slate-200">
+                    <i class="fa-solid fa-qrcode mr-2 text-indigo-400"></i> Quick QR
+                </button>
+                <button onclick="clearAllData()" class="text-xs text-slate-400 hover:text-red-400 px-3 py-2 transition rounded-lg hover:bg-red-500/10">
+                    <i class="fa-solid fa-trash-can mr-1"></i> Reset
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Navigation bar -->
+        <div class="flex md:hidden border-t border-slate-800 bg-slate-900 px-4 py-2 justify-around">
+            <button onclick="switchTab('dashboard')" id="mob-dashboard" class="flex flex-col items-center text-xs text-indigo-400 font-medium">
+                <i class="fa-solid fa-gauge-high text-base mb-1"></i> Dashboard
+            </button>
+            <button onclick="switchTab('analytics')" id="mob-analytics" class="flex flex-col items-center text-xs text-slate-400 font-medium">
+                <i class="fa-solid fa-chart-line text-base mb-1"></i> Analytics
+            </button>
+            <button onclick="switchTab('readme')" id="mob-readme" class="flex flex-col items-center text-xs text-slate-400 font-medium">
+                <i class="fa-brands fa-markdown text-base mb-1"></i> README
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
+
+        <!-- ================= TAB 1: DASHBOARD ================= -->
+        <div id="tab-dashboard" class="space-y-8 animate-fadeIn">
+            <!-- Hero Shortener Card -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 p-6 sm:p-10 shadow-2xl">
+                <div class="absolute -right-20 -top-20 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="max-w-3xl relative z-10">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-3">
+                        Shorten URLs & Generate <span class="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">README Badges</span>
+                    </h1>
+                    <p class="text-slate-400 text-sm sm:text-base mb-6">
+                        Transform long, messy URLs into clean, trackable short links instantly. Export markdown tables directly for your GitHub project READMEs.
+                    </p>
+
+                    <form id="shorten-form" onsubmit="handleShorten(event)" class="space-y-4">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="relative flex-1">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
+                                    <i class="fa-solid fa-globe"></i>
+                                </div>
+                                <input type="url" id="long-url" required placeholder="Paste your long URL here (e.g. https://github.com/my-project)..." 
+                                    class="w-full pl-11 pr-4 py-3.5 bg-slate-900/90 border border-slate-700/80 rounded-2xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base transition">
+                            </div>
+                            <button type="submit" class="inline-flex items-center justify-center px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/30 transition transform active:scale-95 text-sm sm:text-base">
+                                <i class="fa-solid fa-bolt mr-2"></i> Shorten URL
+                            </button>
+                        </div>
+
+                        <!-- Advanced Options Accordion -->
+                        <div class="pt-2">
+                            <button type="button" onclick="toggleAdvanced()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center">
+                                <i id="adv-icon" class="fa-solid fa-chevron-right mr-1.5 transition-transform"></i> Advanced Options (Custom Alias, Tags)
+                            </button>
+                            <div id="advanced-panel" class="hidden mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-800/80">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1">Custom Alias (Optional)</label>
+                                    <div class="flex rounded-xl bg-slate-900 border border-slate-700 overflow-hidden">
+                                        <span class="px-3 py-2 text-xs bg-slate-800 text-slate-400 flex items-center border-r border-slate-700 font-mono">sho.rt/</span>
+                                        <input type="text" id="custom-alias" placeholder="my-custom-link" class="w-full px-3 py-2 bg-transparent text-sm text-slate-100 placeholder-slate-600 focus:outline-none font-mono">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1">Tag / Category</label>
+                                    <input type="text" id="link-tag" placeholder="e.g. Documentation, Social, Release" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Stats Overview Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Links</p>
+                        <h3 id="stat-total-links" class="text-2xl font-bold text-white mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-link"></i>
+                    </div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Clicks</p>
+                        <h3 id="stat-total-clicks" class="text-2xl font-bold text-white mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-arrow-pointer"></i>
+                    </div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Active README Badges</p>
+                        <h3 id="stat-readme-count" class="text-2xl font-bold text-white mt-1">Ready</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center text-xl">
+                        <i class="fa-brands fa-markdown"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Links Table Section -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+                <div class="p-5 sm:p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Your Shortened Links</h2>
+                        <p class="text-xs text-slate-400">Manage, copy, or preview your active short links</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 text-xs">
+                                <i class="fa-solid fa-search"></i>
+                            </span>
+                            <input type="text" id="search-links" oninput="renderLinks()" placeholder="Search links..." class="pl-9 pr-4 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-full sm:w-64">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-800 bg-slate-950/50 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                <th class="py-3.5 px-6">Short Link</th>
+                                <th class="py-3.5 px-6">Original Destination</th>
+                                <th class="py-3.5 px-6">Tag</th>
+                                <th class="py-3.5 px-6 text-center">Clicks</th>
+                                <th class="py-3.5 px-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="links-table-body" class="divide-y divide-slate-800/60 text-sm">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty state -->
+                <div id="empty-state" class="hidden py-16 text-center">
+                    <div class="w-16 h-16 bg-slate-800/60 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500 text-2xl">
+                        <i class="fa-solid fa-link-slash"></i>
+                    </div>
+                    <h3 class="text-base font-semibold text-slate-300">No short links created yet</h3>
+                    <p class="text-xs text-slate-500 mt-1">Paste your first URL above to generate a short link and README snippet.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: ANALYTICS ================= -->
+        <div id="tab-analytics" class="space-y-8 hidden animate-fadeIn">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Analytics & Performance</h1>
+                <p class="text-slate-400 text-sm mt-1">Real-time click metrics and link activity tracking.</p>
+            </div>
+
+            <!-- Analytics Summary Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Top Performing Link -->
+                <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-base font-semibold text-white">Top Performing Link</h3>
+                            <span class="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 text-xs font-medium"><i class="fa-solid fa-trophy mr-1"></i> #1</span>
+                        </div>
+                        <div id="top-link-card" class="space-y-3">
+                            <p class="text-sm text-slate-400">No data available yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Breakdown -->
+                <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl">
+                    <h3 class="text-base font-semibold text-white mb-4">Device & Referrer Simulation</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>Desktop Browsers</span>
+                                <span class="font-semibold text-indigo-400">68%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="bg-indigo-500 h-full rounded-full" style="width: 68%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>Mobile / Tablets</span>
+                                <span class="font-semibold text-violet-400">24%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="bg-violet-500 h-full rounded-full" style="width: 24%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>GitHub / README Direct</span>
+                                <span class="font-semibold text-emerald-400">8%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 h-full rounded-full" style="width: 8%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Link Analytics List -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-xl p-6">
+                <h3 class="text-base font-semibold text-white mb-4">Click Distribution by Link</h3>
+                <div id="analytics-links-list" class="space-y-3">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: README GENERATOR ================= -->
+        <div id="tab-readme" class="space-y-8 hidden animate-fadeIn">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-white">README Markdown Studio</h1>
+                    <p class="text-slate-400 text-sm mt-1">Generate markdown link badges, project documentation, and quick access tables for GitHub.</p>
+                </div>
+                <button onclick="copyReadmeMarkdown()" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm shadow-lg shadow-indigo-600/30 transition">
+                    <i class="fa-regular fa-copy mr-2"></i> Copy Markdown
+                </button>
+            </div>
+
+            <!-- README Config / Preview Tabs -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left: Configuration Controls -->
+                <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-5">
+                    <h3 class="text-base font-bold text-white flex items-center">
+                        <i class="fa-solid fa-sliders mr-2 text-indigo-400"></i> Generator Settings
+                    </h3>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5">Project Title</label>
+                        <input type="text" id="readme-project-title" value="🚀 Awesome Project Resources" oninput="updateReadmePreview()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5">Project Description</label>
+                        <textarea id="readme-project-desc" rows="3" oninput="updateReadmePreview()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">Quick access shortcuts and resource links for our repository.</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5">Badge Style</label>
+                        <select id="readme-badge-style" onchange="updateReadmePreview()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            <option value="flat">Flat (Shields.io)</option>
+                            <option value="for-the-badge">For the Badge</option>
+                            <option value="social">Social Style</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-800">
+                        <label class="block text-xs font-medium text-slate-400 mb-2">Include Sections</label>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                                <input type="checkbox" id="inc-badges" checked onchange="updateReadmePreview()" class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                <span>Markdown Badges</span>
+                            </label>
+                            <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                                <input type="checkbox" id="inc-table" checked onchange="updateReadmePreview()" class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                <span>Quick Links Table</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Markdown Code Preview -->
+                <div class="lg:col-span-2 bg-slate-900/80 border border-slate-800 rounded-3xl p-6 flex flex-col">
+                    <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-800">
+                        <span class="text-xs font-mono text-slate-400 uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-code mr-2 text-violet-400"></i> README.md Code Output
+                        </span>
+                        <span class="text-xs text-slate-500">Markdown Ready</span>
+                    </div>
+                    <div class="flex-1 bg-slate-950 rounded-2xl p-4 border border-slate-800/80 overflow-x-auto">
+                        <pre id="readme-code-output" class="font-mono text-xs text-indigo-300 whitespace-pre-wrap leading-relaxed"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm hidden animate-fadeIn">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full mx-4 shadow-2xl text-center relative">
+            <button onclick="closeModal('qr-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white mb-1">QR Code Generator</h3>
+            <p id="qr-modal-subtitle" class="text-xs text-slate-400 mb-6">Scan to open short link instantly</p>
+            
+            <div id="qrcode-container" class="bg-white p-4 rounded-2xl inline-block mb-6 shadow-inner flex justify-center items-center min-h-[180px] min-w-[180px]"></div>
+
+            <div class="flex gap-3">
+                <button onclick="downloadQRCode()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition">
+                    <i class="fa-solid fa-download mr-1.5"></i> Download QR
+                </button>
+                <button onclick="closeModal('qr-modal')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-sm transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Redirect Simulator Modal (Simulates clicking a short link) -->
+    <div id="redirect-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md hidden animate-fadeIn">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl text-center space-y-4">
+            <div class="w-16 h-16 bg-indigo-500/10 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Redirecting...</h3>
+            <p class="text-xs text-slate-400">You are being redirected securely via your short link to:</p>
+            <div id="redirect-url-display" class="bg-slate-950 px-4 py-3 rounded-xl font-mono text-xs text-indigo-300 break-all border border-slate-800"></div>
+            
+            <div class="pt-4 flex gap-3">
+                <a id="redirect-proceed-btn" href="#" target="_blank" onclick="closeModal('redirect-modal')" class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition shadow-lg shadow-indigo-600/30">
+                    Visit Now
+                </a>
+                <button onclick="closeModal('redirect-modal')" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-sm transition">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 border border-indigo-500/30 shadow-2xl rounded-2xl px-4 py-3 flex items-center space-x-3">
+            <div id="toast-icon" class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <div>
+                <p id="toast-title" class="text-sm font-bold text-white">Success</p>
+                <p id="toast-desc" class="text-xs text-slate-400">Action completed successfully.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // State management
+        let links = JSON.parse(localStorage.getItem('linkpulse_links')) || [
+            {
+                id: 'demo1',
+                originalUrl: 'https://github.com/features/actions',
+                shortCode: 'actions',
+                customAlias: 'actions',
+                tag: 'Documentation',
+                clicks: 14,
+                createdAt: new Date(Date.now() - 86400000 * 2).toISOString()
+            },
+            {
+                id: 'demo2',
+                originalUrl: 'https://tailwindcss.com/docs',
+                shortCode: 'tailwind',
+                customAlias: 'tailwind',
+                tag: 'Design',
+                clicks: 29,
+                createdAt: new Date(Date.now() - 86400000 * 5).toISOString()
+            }
+        ];
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            renderLinks();
+            updateStats();
+            updateReadmePreview();
+        });
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            ['dashboard', 'analytics', 'readme'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`nav-${t}`).classList.remove('bg-indigo-600', 'text-white', 'shadow');
+                document.getElementById(`nav-${t}`).classList.add('text-slate-400', 'hover:text-white');
+                const mobBtn = document.getElementById(`mob-${t}`);
+                if(mobBtn) {
+                    mobBtn.classList.remove('text-indigo-400', 'font-medium');
+                    mobBtn.classList.add('text-slate-400');
+                }
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            activeNav.classList.add('bg-indigo-600', 'text-white', 'shadow');
+            activeNav.classList.remove('text-slate-400', 'hover:text-white');
+
+            const activeMob = document.getElementById(`mob-${tabId}`);
+            if(activeMob) {
+                activeMob.classList.add('text-indigo-400', 'font-medium');
+                activeMob.classList.remove('text-slate-400');
+            }
+
+            if(tabId === 'analytics') renderAnalytics();
+            if(tabId === 'readme') updateReadmePreview();
+        }
+
+        // Advanced Panel Toggle
+        function toggleAdvanced() {
+            const panel = document.getElementById('advanced-panel');
+            const icon = document.getElementById('adv-icon');
+            panel.classList.toggle('hidden');
+            icon.classList.toggle('rotate-90');
+        }
+
+        // Handle Shorten Form Submission
+        function handleShorten(e) {
+            e.preventDefault();
+            const longUrlInput = document.getElementById('long-url');
+            const customAliasInput = document.getElementById('custom-alias');
+            const tagInput = document.getElementById('link-tag');
+
+            let longUrl = longUrlInput.value.trim();
+            if (!longUrl.startsWith('http://') && !longUrl.startsWith('https://')) {
+                longUrl = 'https://' + longUrl;
+            }
+
+            let shortCode = customAliasInput.value.trim().replace(/[^a-zA-Z0-9-_]/g, '');
+            if (!shortCode) {
+                // Fixed SyntaxError by correctly calling .toString(36) before .substring()
+                shortCode = Math.random().toString(36).substring(2, 8);
+            } else {
+                // Check if alias exists
+                if (links.some(l => l.shortCode === shortCode)) {
+                    showToast('Alias Already Taken', 'Please choose a different custom alias.', 'error');
+                    return;
+                }
+            }
+
+            const newLink = {
+                id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(),
+                originalUrl: longUrl,
+                shortCode: shortCode,
+                customAlias: customAliasInput.value.trim(),
+                tag: tagInput.value.trim() || 'General',
+                clicks: 0,
+                createdAt: new Date().toISOString()
+            };
+
+            links.unshift(newLink);
+            saveAndRefresh();
+
+            longUrlInput.value = '';
+            customAliasInput.value = '';
+            tagInput.value = '';
+            document.getElementById('advanced-panel').classList.add('hidden');
+            document.getElementById('adv-icon').classList.remove('rotate-90');
+
+            showToast('Link Shortened!', `sho.rt/${shortCode} has been generated successfully.`);
+        }
+
+        // Save & Refresh
+        function saveAndRefresh() {
+            localStorage.setItem('linkpulse_links', JSON.stringify(links));
+            renderLinks();
+            updateStats();
+            updateReadmePreview();
+        }
+
+        // Render Links Table
+        function renderLinks() {
+            const tbody = document.getElementById('links-table-body');
+            const emptyState = document.getElementById('empty-state');
+            const searchTerm = document.getElementById('search-links').value.toLowerCase();
+
+            const filtered = links.filter(l => 
+                l.originalUrl.toLowerCase().includes(searchTerm) || 
+                l.shortCode.toLowerCase().includes(searchTerm) ||
+                l.tag.toLowerCase().includes(searchTerm)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            tbody.innerHTML = filtered.map(link => `
+                <tr class="hover:bg-slate-900/40 transition">
+                    <td class="py-4 px-6 font-mono text-xs">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-indigo-400 font-semibold cursor-pointer hover:underline" onclick="simulateRedirect('${link.id}')">sho.rt/${link.shortCode}</span>
+                            <button onclick="copyToClipboard('https://sho.rt/${link.shortCode}')" class="text-slate-500 hover:text-slate-300 p-1 transition" title="Copy Short Link">
+                                <i class="fa-regular fa-copy text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6">
+                        <a href="${link.originalUrl}" target="_blank" class="text-slate-300 hover:text-indigo-300 truncate max-w-xs block text-xs" title="${link.originalUrl}">
+                            ${link.originalUrl}
+                        </a>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                            ${link.tag}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-center font-semibold text-slate-200 text-xs">
+                        ${link.clicks}
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-1">
+                        <button onclick="showQRCodeModal('https://sho.rt/${link.shortCode}', '${link.shortCode}')" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition text-xs" title="Generate QR Code">
+                            <i class="fa-solid fa-qrcode"></i>
+                        </button>
+                        <button onclick="deleteLink('${link.id}')" class="p-2 rounded-lg bg-slate-800/80 hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition text-xs" title="Delete Link">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Delete Link
+        function deleteLink(id) {
+            links = links.filter(l => l.id !== id);
+            saveAndRefresh();
+            showToast('Deleted', 'Short link removed successfully.', 'info');
+        }
+
+        // Clear All Data
+        function clearAllData() {
+            links = [];
+            saveAndRefresh();
+            showToast('Reset Complete', 'All links have been cleared.', 'info');
+        }
+
+        // Update Statistics
+        function updateStats() {
+            document.getElementById('stat-total-links').innerText = links.length;
+            const totalClicks = links.reduce((sum, l) => sum + l.clicks, 0);
+            document.getElementById('stat-total-clicks').innerText = totalClicks;
+        }
+
+        // Simulate Redirect / Click
+        function simulateRedirect(id) {
+            const link = links.find(l => l.id === id);
+            if (!link) return;
+
+            link.clicks += 1;
+            saveAndRefresh();
+
+            document.getElementById('redirect-url-display').innerText = link.originalUrl;
+            document.getElementById('redirect-proceed-btn').href = link.originalUrl;
+            openModal('redirect-modal');
+        }
+
+        // QR Code Modal Handler
+        let currentQRText = '';
+        function showQRCodeModal(url, code) {
+            currentQRText = url;
+            document.getElementById('qr-modal-subtitle').innerText = `sho.rt/${code}`;
+            const container = document.getElementById('qrcode-container');
+            container.innerHTML = '';
+            new QRCode(container, {
+                text: url,
+                width: 160,
+                height: 160,
+                colorDark: "#0f172a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            openModal('qr-modal');
+        }
+
+        function downloadQRCode() {
+            const img = document.querySelector('#qrcode-container img');
+            if (img) {
+                const link = document.createElement('a');
+                link.download = 'qrcode.png';
+                link.href = img.src;
+                link.click();
+                showToast('Downloaded', 'QR Code saved successfully.');
+            }
+        }
+
+        // Analytics Tab Render
+        function renderAnalytics() {
+            const topCard = document.getElementById('top-link-card');
+            const listContainer = document.getElementById('analytics-links-list');
+
+            if (links.length === 0) {
+                topCard.innerHTML = `<p class="text-sm text-slate-400">No links created yet.</p>`;
+                listContainer.innerHTML = `<p class="text-sm text-slate-400 text-center py-4">No data to display.</p>`;
+                return;
+            }
+
+            const sorted = [...links].sort((a, b) => b.clicks - a.clicks);
+            const top = sorted[0];
+
+            topCard.innerHTML = `
+                <div class="space-y-2">
+                    <p class="font-mono text-indigo-400 font-bold text-sm">sho.rt/${top.shortCode}</p>
+                    <p class="text-xs text-slate-300 truncate">${top.originalUrl}</p>
+                    <div class="pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800">
+                        <span>Tag: ${top.tag}</span>
+                        <span class="font-bold text-emerald-400">${top.clicks} Clicks</span>
+                    </div>
+                </div>
+            `;
+
+            listContainer.innerHTML = sorted.map(l => `
+                <div class="flex items-center justify-between p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 text-xs">
+                    <div>
+                        <span class="font-mono font-semibold text-indigo-300">sho.rt/${l.shortCode}</span>
+                        <span class="text-slate-500 ml-2 truncate max-w-xs inline-block align-bottom">${l.originalUrl}</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">${l.tag}</span>
+                        <span class="font-bold text-emerald-400">${l.clicks} clicks</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // README Generator Logic
+        function updateReadmePreview() {
+            const title = document.getElementById('readme-project-title').value;
+            const desc = document.getElementById('readme-project-desc').value;
+            const badgeStyle = document.getElementById('readme-badge-style').value;
+            const incBadges = document.getElementById('inc-badges').checked;
+            const incTable = document.getElementById('inc-table').checked;
+
+            let md = `# ${title}\n\n${desc}\n\n`;
+
+            if (incBadges && links.length > 0) {
+                md += `### Quick Badges\n\n`;
+                links.forEach(l => {
+                    md += `[![${l.shortCode}](https://img.shields.io/badge/${encodeURIComponent(l.shortCode)}-${l.clicks}%20clicks-indigo?style=${badgeStyle})](https://sho.rt/${l.shortCode})\n`;
+                });
+                md += `\n`;
+            }
+
+            if (incTable) {
+                md += `### 🔗 Resource Links\n\n`;
+                md += `| Shortcut | Destination | Category |\n`;
+                md += `| :--- | :--- | :--- |\n`;
+                links.forEach(l => {
+                    md += `| [\`sho.rt/${l.shortCode}\`](https://sho.rt/${l.shortCode}) | ${l.originalUrl} | ${l.tag} |\n`;
+                });
+            }
+
+            document.getElementById('readme-code-output').innerText = md;
+        }
+
+        function copyReadmeMarkdown() {
+            const md = document.getElementById('readme-code-output').innerText;
+            copyToClipboard(md);
+            showToast('Copied!', 'README markdown copied to clipboard.');
+        }
+
+        // Utility: Copy to Clipboard
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Copied to Clipboard', text);
+            } catch (err) {
+                showToast('Failed', 'Could not copy text', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // Modal Helpers
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Toast Notification Helper
+        function showToast(title, desc, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-desc').innerText = desc;
+            
+            const icon = document.getElementById('toast-icon');
+            if(type === 'error') {
+                icon.className = 'w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-sm';
+                icon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else {
+                icon.className = 'w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm';
+                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
